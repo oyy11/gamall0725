@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<table id="dg" class="easyui-datagrid" title="Basic DataGrid"
+       data-options="singleSelect:true,collapsible:true,method:'get',toolbar:'#tb'">
+    <thead>
+    <tr>
+        <th data-options="field:'id'" width="20%">属性id</th>
+        <th data-options="field:'attrName'" width="80%">属性名</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="tb">
+    <a href="javascript:addAtrrInfo()" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">编辑</a>
+    <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+    <br/>
+    一级分类 <select id="ctg1ForAttrList" class="easyui-combobox" data-options="onSelect: function(rec){
+            $('#ctg2ForAttrList').combobox('clear');
+            $('#ctg3ForAttrList').combobox('clear');
+            var url = 'getCatalog2?catalog1Id='+rec.id;
+            $('#ctg2ForAttrList').combobox('reload', url);
+        },url:'/getCatalog1',valueField:'id',textField:'name'" style="width:100px"></select>
+    二级分类 <select id="ctg2ForAttrList" class="easyui-combobox" data-options="onSelect: function(rec){
+            $('#ctg3ForAttrList').combobox('clear');
+            var url = 'getCatalog3?catalog2Id='+rec.id;
+            $('#ctg3ForAttrList').combobox('reload', url);
+            }, valueField:'id',textField:'name' " style="width: 100px"></select>
+    三级分类 <select id="ctg3ForAttrList" class="easyui-combobox" data-options="valueField:'id',textField:'name'"
+                 style="width: 100px"></select>
+    <a href="javascript:reloadAttrList();" class="easyui-linkbutton" data-options="iconCls:'icon-search'">刷新属性列表</a>
+</div>
+<div id="dlg" buttons="#bb" class="easyui-dialog" title="Basic Dialog" data-options="iconCls:'icon-save',closed:true"
+     style="width:600px;height:400px;">
+
+    <form id="attrForm">
+        <br/>
+        <label>属性名称:</label>
+        <input id="attrName" name="attrName" class="easyui-textbox" data-options="" style="width:100px"/>
+        <br/><br/>
+        <table id="dg_av" class="easyui-datagrid" title="属性值列表"></table>
+    </form>
+</div>
+<div id="bb">
+    <a href="#" class="easyui-linkbutton" onclick="saveAttr()">保存</a>
+    <a href="#" class="easyui-linkbutton">关闭</a>
+</div>
+
+<script language="JavaScript">
+
+
+    //添加
+    function addAtrrInfo() {
+        //获取三级分类的id
+        var catalog3Id = $("#ctg3ForAttrList").combobox("getValue");
+        if (!catalog3Id) {
+            //没有选三级分类的话，并提示
+            alert("请选择一个后，再添加属性");
+        } else {
+            $("#dlg").dialog('open');
+
+            //初始化属性值表格
+            initAttrValueDatagrid();
+        }
+    }
+
+
+    //在点击添加后，初始化属性值表格
+    function initAttrValueDatagrid() {
+        datagrid = $("#dg_av").datagrid({
+            columns: [[
+                {field: 'id', title: '编号', width: '20%'},
+                {
+                    field: 'valueName', title: '属性值名称', width: '80%',
+                    editor: {
+                        type: 'validatebox', options: {required: true}  //必填项
+                    }
+                }
+            ]],
+            toolbar: [
+                {
+                    text: '添加',
+                    iconCls: 'icon-add',
+                    handler: function () {
+                        datagrid.datagrid('appendRow', {id: '', valueName: ''})
+                    }
+
+                },
+                {
+                    text:'删除',
+                    iconCls:'icon-remove',
+                    handler:function () {
+                        //获取选中行
+                        var row = datagrid.datagrid('getSelected');
+
+                        if(row){
+                            //获取选中行的索引
+                            var rowIndex = datagrid.datagrid('getRowIndex');
+                            //根据索引，删除选中行
+                            datagrid.datagrid('deleteRow',rowIndex);
+                        }
+                    }
+                }
+            ]
+
+        });
+    }
+
+    //用于刷新属性列表
+    function reloadAttrList() {
+        //获取三级分类的id
+        var catalog3Id = $("#ctg3ForAttrList").combobox("getValue");
+        if (!catalog3Id) {
+            //没有选三级分类的话，并提示
+            alert("请选择后，再查询");
+        } else {
+            $("#dg").datagrid({url: 'getAttrList?catalog3Id=' + catalog3Id});
+        }
+
+
+    }
+
+</script>
+</body>
+</html>
