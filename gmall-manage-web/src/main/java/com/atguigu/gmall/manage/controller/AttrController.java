@@ -15,6 +15,15 @@ public class AttrController {
     @Reference
     BaseAttrInfoService baseAttrInfoService;
 
+    @RequestMapping("saveAttr")
+    @ResponseBody
+    public String saveAttr(BaseAttrInfo baseAttrInfo){
+
+        baseAttrInfoService.saveAttr(baseAttrInfo);
+
+        return "SUCCESS";
+    }
+
     @RequestMapping("attrListPage")
     public String attrListPage(){
 

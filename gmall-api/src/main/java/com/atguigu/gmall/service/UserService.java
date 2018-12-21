@@ -17,4 +17,5 @@ public interface UserService  {
     UserAddress getAddressListById(String addressId);
 
 
+    UserInfo login(UserInfo userInfo);
 }
